@@ -1,0 +1,22 @@
+# Spring Boot configuration
+backend/src/main/resources/application.yml
+
+# Environment files
+.env
+.env.*
+
+# Node
+**/node_modules/
+**/dist/
+
+# Java
+**/target/
+*.class
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Logs
+*.log
