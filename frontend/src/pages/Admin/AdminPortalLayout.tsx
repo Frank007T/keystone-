@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Users, 
@@ -10,6 +10,7 @@ import {
   FileText, 
   BarChart2, 
   Settings,
+  Shield,
   ChevronLeft,
   Search,
   Bell
@@ -18,16 +19,23 @@ import {
 const adminNavItems = [
   { label: 'Dashboard', path: 'dashboard', icon: LayoutDashboard },
   { label: 'Managers', path: 'managers', icon: Users },
-  { label: 'Users', path: 'users', icon: Users },
-  { label: 'Zones', path: 'zones', icon: MapPin },
-  { label: 'Requests', path: 'requests', icon: ClipboardList },
   { label: 'Users', path: 'users', icon: UserCheck },
-  { label: 'System Logs', path: 'audit-logs', icon: FileText },
+  { label: 'Requests', path: 'requests', icon: ClipboardList },
+  { label: 'Roles', path: 'roles', icon: Shield },
+  { label: 'Audit Logs', path: 'audit-logs', icon: FileText },
   { label: 'Reports', path: 'reports', icon: BarChart2 },
   { label: 'Settings', path: 'settings', icon: Settings },
 ];
 
 export function AdminPortalLayout() {
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    localStorage.removeItem('keystoneToken');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userEmail');
+    navigate('/');
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
       <div className="grid min-h-screen grid-cols-[260px_1fr]">
@@ -122,6 +130,13 @@ export function AdminPortalLayout() {
                   <p className="text-xs text-slate-400">superadmin@keystone.com</p>
                 </div>
               </div>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Logout
+              </button>
             </div>
           </header>
 

@@ -6,9 +6,14 @@ import { Navbar } from '@/components/Navbar';
 
 // Public & Auth Pages
 import { LandingPage } from '@/pages/LandingPage';
+import { AboutPage } from '@/pages/AboutPage';
+import { ServicesPage } from '@/pages/ServicesPage';
+import { FeaturesPage } from '@/pages/FeaturesPage';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { RoleSelectionPage } from '@/pages/auth/RoleSelectionPage';
 import { CustomerSignupPage } from '@/pages/Customer/CustomerSignupPage';
+import { ContactPage } from '@/pages/ContactPage';
+import { PricingPage } from '@/pages/PricingPage';
 import { OtpVerifyPage } from '@/pages/auth/OtpVerifyPage';
 import { VerifyEmailPage } from '@/pages/auth/VerifyEmailPage';
 import { WaitingApprovalPage } from '@/pages/auth/WaitingApprovalPage';
@@ -20,6 +25,10 @@ import { AdminDashboardPage } from './pages/Admin/AdminDashboardPage';
 import { ManageUsersPage } from './pages/Admin/ManageUsersPage';
 import { ManagerRequestsPage } from './pages/Admin/ManagerRequestsPage';
 import { ManageManagersPage } from '@/pages/Admin/ManageManagersPage';
+import { AdminRolesPage } from '@/pages/Admin/AdminRolesPage';
+import { AdminAuditLogsPage } from '@/pages/Admin/AdminAuditLogsPage';
+import { AdminSettingsPage } from '@/pages/Admin/AdminSettingsPage';
+import { AdminReportsPage } from '@/pages/Admin/AdminReportsPage';
 
 // Customer Pages
 import { CustomerPortalLayout } from '@/pages/Customer/CustomerPortalLayout';
@@ -77,10 +86,11 @@ const pageTransition = {
 
 export default function App() {
   const location = useLocation();
+  const showNavbar = !location.pathname.startsWith('/portal') && !location.pathname.startsWith('/admin');
 
   return (
     <div className="min-h-screen bg-background text-slate-900">
-      <Navbar />
+      {showNavbar && <Navbar />}
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           {/* Public & Auth Routes */}
@@ -89,6 +99,46 @@ export default function App() {
             element={
               <motion.div {...pageTransition} transition={{ duration: 0.45 }}>
                 <LandingPage />
+              </motion.div>
+            }
+          />
+          <Route
+            path="/about"
+            element={
+              <motion.div {...pageTransition} transition={{ duration: 0.45 }}>
+                <AboutPage />
+              </motion.div>
+            }
+          />
+          <Route
+            path="/services"
+            element={
+              <motion.div {...pageTransition} transition={{ duration: 0.45 }}>
+                <ServicesPage />
+              </motion.div>
+            }
+          />
+          <Route
+            path="/features"
+            element={
+              <motion.div {...pageTransition} transition={{ duration: 0.45 }}>
+                <FeaturesPage />
+              </motion.div>
+            }
+          />
+          <Route
+            path="/pricing"
+            element={
+              <motion.div {...pageTransition} transition={{ duration: 0.45 }}>
+                <PricingPage />
+              </motion.div>
+            }
+          />
+          <Route
+            path="/contact"
+            element={
+              <motion.div {...pageTransition} transition={{ duration: 0.45 }}>
+                <ContactPage />
               </motion.div>
             }
           />
@@ -163,9 +213,10 @@ export default function App() {
             <Route path="dashboard" element={<AdminDashboardPage />} />
             <Route path="users" element={<ManageUsersPage />} />
             <Route path="requests" element={<ManagerRequestsPage />} />
-            <Route path="roles" element={<div>Role Permissions</div>} />
-            <Route path="audit-logs" element={<div>Audit Logs</div>} />
-            <Route path="settings" element={<div>Settings</div>} />
+            <Route path="roles" element={<AdminRolesPage />} />
+            <Route path="audit-logs" element={<AdminAuditLogsPage />} />
+            <Route path="reports" element={<AdminReportsPage />} />
+            <Route path="settings" element={<AdminSettingsPage />} />
           </Route>
 
           {/* Customer Portal */}

@@ -1,5 +1,6 @@
 package com.keystone.backend.controller;
 
+import com.keystone.backend.annotation.AuditLog;
 import com.keystone.backend.entity.UserEntity;
 import com.keystone.backend.entity.WorkOrderEntity;
 import com.keystone.backend.repository.UserRepository;
@@ -57,6 +58,7 @@ public class DispatcherDataController {
     }
 
     @PutMapping("/work-orders/{id}/assign")
+    @AuditLog(action = "ASSIGN_DELIVERY", module = "DISPATCH", description = "Assigned a work order", entityType = "WORK_ORDER")
     public ResponseEntity<?> assignWorkOrder(@PathVariable Long id, @RequestBody AssignRequest request) {
         return workOrderRepository.findById(id).map(workOrder -> {
             workOrder.setAssignedToEmail(request.technicianEmail());

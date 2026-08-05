@@ -5,5 +5,6 @@ public enum Role {
     TECHNICIAN,
     DISPATCHER,
     MANAGER,
+    ADMIN,
     SUPER_ADMIN
 }

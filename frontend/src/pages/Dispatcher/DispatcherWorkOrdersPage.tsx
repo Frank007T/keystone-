@@ -9,14 +9,14 @@ import {
   sendDispatcherTechnicianMessage,
   Notification,
   WorkOrder,
-  User,
+  Technician,
 } from '../../lib/api';
 
 type ChatType = 'MANAGER' | 'TECHNICIAN';
 
 export function DispatcherWorkOrdersPage() {
   const [orders, setOrders] = useState<WorkOrder[]>([]);
-  const [technicians, setTechnicians] = useState<User[]>([]);
+  const [technicians, setTechnicians] = useState<Technician[]>([]);
   const [loading, setLoading] = useState(true);
   const [assigningId, setAssigningId] = useState<number | null>(null);
   const [error, setError] = useState('');
@@ -179,12 +179,22 @@ export function DispatcherWorkOrdersPage() {
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold ${
-                          order.status?.toUpperCase() === 'ASSIGNED'
+                          (order.status || '').toString().toLowerCase().includes('assigned')
                             ? 'bg-blue-100 text-blue-700'
                             : 'bg-amber-100 text-amber-700'
                         }`}
                       >
-                        {order.status}
+                        {(order.status || '').toString().trim().toLowerCase().includes('assigned')
+                          ? 'assigned'
+                          : (order.status || '').toString().trim().toLowerCase().includes('success')
+                            ? 'success'
+                            : (order.status || '').toString().trim().toLowerCase().includes('failed')
+                              ? 'failed'
+                              : (order.status || '').toString().trim().toLowerCase().includes('pending')
+                                ? 'pending'
+                                : (order.status || '').toString().trim().toLowerCase().includes('processing') || (order.status || '').toString().trim().toLowerCase().includes('in progress')
+                                  ? 'processing'
+                                  : 'pending'}
                       </span>
                     </td>
                     <td className="px-6 py-4">

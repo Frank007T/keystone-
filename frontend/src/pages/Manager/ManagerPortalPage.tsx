@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 
 const navItems = [
@@ -17,7 +17,7 @@ const navItems = [
 ];
 
 export function ManagerPortalLayout() {
-  const [notifications, setNotifications] = useState([]);
+  const [notifications, setNotifications] = useState<Array<{ id?: number | string; title?: string; message?: string; senderRole?: string; isRead?: boolean }>>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const token = localStorage.getItem('token');
 
@@ -82,18 +82,24 @@ export function ManagerPortalLayout() {
         </aside>
 
         <main className="bg-slate-100 p-6">
-          <header className="mb-8 flex flex-col gap-4 rounded-[32px] bg-white p-6 shadow-soft sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm uppercase tracking-[0.3em] text-slate-400">
-                Manager workspace
-              </p>
-              <h2 className="mt-2 text-3xl font-semibold text-slate-950">
-                Operational command center
-              </h2>
-            </div>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
+            <div className="text-sm text-slate-700">Manager portal</div>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">Alex Johnson • Manager</div>
+          </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              {/* Notification Button */}
+          <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
+            <section className="rounded-[32px] bg-white p-6 shadow-soft">
+              <h3 className="text-xl font-semibold text-slate-950">Welcome back</h3>
+              <p className="mt-2 text-slate-500">Access your manager tools from the left navigation menu.</p>
+            </section>
+            <section className="rounded-[32px] bg-white p-6 shadow-soft">
+              <h3 className="text-xl font-semibold text-slate-950">Quick actions</h3>
+              <p className="mt-2 text-slate-500">Review reports, manage users, and handle requests.</p>
+            </section>
+          </div>
+
+          <div className="mt-8">
+            {/* Existing content continues here */}
               <div className="relative">
                 <button
                   onClick={() => setShowDropdown(!showDropdown)}
@@ -141,10 +147,10 @@ export function ManagerPortalLayout() {
                             key={item.id}
                             className="rounded-xl bg-slate-50 p-2.5 text-xs border border-slate-100 hover:bg-slate-100 transition"
                           >
-                            <p className="font-bold text-slate-800">{item.title}</p>
-                            <p className="text-slate-600 line-clamp-2 mt-0.5">{item.message}</p>
+                            <p className="font-bold text-slate-800">{item.title ?? 'Notification'}</p>
+                            <p className="text-slate-600 line-clamp-2 mt-0.5">{item.message ?? 'No message available.'}</p>
                             <span className="text-[10px] text-slate-400 block mt-1">
-                              From: {item.senderRole}
+                              From: {item.senderRole ?? 'System'}
                             </span>
                           </div>
                         ))
@@ -154,15 +160,10 @@ export function ManagerPortalLayout() {
                 )}
               </div>
 
-              <button className="rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-soft hover:bg-slate-800">
-                Create Work Order
-              </button>
-
               <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
                 Alex Johnson • Manager
               </div>
             </div>
-          </header>
 
           <Outlet />
         </main>

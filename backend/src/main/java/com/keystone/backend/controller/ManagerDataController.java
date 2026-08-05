@@ -150,20 +150,7 @@ public class ManagerDataController {
 
     @PostMapping("/work-orders")
     public ResponseEntity<WorkOrderDto> createManagerWorkOrder(@RequestBody CreateManagerWorkOrderRequest request) {
-        WorkOrderEntity workOrder = new WorkOrderEntity();
-        workOrder.setTitle(request.title());
-        workOrder.setDescription(request.description());
-        workOrder.setSiteName(request.siteName());
-        workOrder.setCustomerEmail(request.customerEmail());
-        workOrder.setAssignedToEmail(request.assignedToEmail());
-        workOrder.setPriority(request.priority() != null ? request.priority() : "MEDIUM");
-        workOrder.setStatus(request.status() != null ? request.status() : "OPEN");
-
-        if (request.dueDate() != null && !request.dueDate().isBlank()) {
-            workOrder.setDueDate(Instant.parse(request.dueDate()));
-        }
-
-        return ResponseEntity.ok(toWorkOrderDto(workOrderRepository.save(workOrder)));
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only dispatchers can create work orders.");
     }
 
     // DTO Records

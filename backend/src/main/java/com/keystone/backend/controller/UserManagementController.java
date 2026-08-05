@@ -1,5 +1,6 @@
 package com.keystone.backend.controller;
 
+import com.keystone.backend.annotation.AuditLog;
 import com.keystone.backend.entity.Role;
 import com.keystone.backend.entity.UserEntity;
 import com.keystone.backend.repository.UserRepository;
@@ -32,6 +33,7 @@ public class UserManagementController {
     // ==================== MANAGER MANAGEMENT (SUPER_ADMIN ONLY) ====================
 
     @PostMapping("/managers")
+    @AuditLog(action = "CREATE_MANAGER", module = "USER_MANAGEMENT", description = "Created a manager account", entityType = "USER")
     public ResponseEntity<?> createManager(@Valid @RequestBody CreateManagerRequest request) {
         requireSuperAdmin();
         
@@ -60,6 +62,7 @@ public class UserManagementController {
     }
 
     @PutMapping("/managers/{id}")
+    @AuditLog(action = "UPDATE_USER", module = "USER_MANAGEMENT", description = "Updated a manager", entityType = "USER")
     public ResponseEntity<?> editManager(@PathVariable Long id, @Valid @RequestBody EditManagerRequest request) {
         requireSuperAdmin();
         
@@ -81,6 +84,7 @@ public class UserManagementController {
     }
 
     @DeleteMapping("/managers/{id}")
+    @AuditLog(action = "DELETE_USER", module = "USER_MANAGEMENT", description = "Deleted a manager", entityType = "USER")
     public ResponseEntity<?> deleteManager(@PathVariable Long id) {
         requireSuperAdmin();
         
@@ -113,6 +117,7 @@ public class UserManagementController {
     // ==================== DISPATCHER MANAGEMENT (MANAGER ONLY) ====================
 
     @PostMapping("/dispatchers")
+    @AuditLog(action = "CREATE_DISPATCHER", module = "USER_MANAGEMENT", description = "Created a dispatcher account", entityType = "USER")
     public ResponseEntity<?> createDispatcher(@Valid @RequestBody CreateDispatcherRequest request) {
         requireManager();
         Long managerId = getCurrentUserId();
@@ -199,39 +204,28 @@ public class UserManagementController {
 
     // ==================== TECHNICIAN MANAGEMENT (MANAGER ONLY) ====================
 
-   @PostMapping("/technicians")
-public ResponseEntity<?> createTechnician(
-        @Valid @RequestBody CreateTechnicianRequest request) {
+    @PostMapping("/technicians")
+    public ResponseEntity<?> createTechnician(
+            @Valid @RequestBody CreateTechnicianRequest request) {
 
-    requireManager();
+        requireManager();
 
-    UserEntity manager = userRepository.findById(getCurrentUserId())
-            .orElseThrow(() -> new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED,
-                    "Manager not found"));
+        UserEntity manager = userRepository.findById(getCurrentUserId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED,
+                        "Manager not found"));
 
-    UserEntity dispatcher = userRepository.findById(request.dispatcherId())
-            .orElseThrow(() -> new IllegalArgumentException("Dispatcher not found."));
+        UserEntity technician = userManagementService.createTechnician(
+                request.fullName(),
+                request.email(),
+                request.phone(),
+                manager.getId(),
+                manager.getZoneId()
+        );
 
-    // Dispatcher must belong to the same zone
-    if (dispatcher.getRole() != Role.DISPATCHER ||
-        !dispatcher.getZoneId().equals(manager.getZoneId())) {
-        throw new IllegalArgumentException(
-                "Dispatcher does not belong to your zone.");
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(toTechnicianDto(technician));
     }
-
-    UserEntity technician = userManagementService.createTechnician(
-            request.fullName(),
-            request.email(),
-            request.phone(),
-            manager.getId(),
-            dispatcher.getId(),
-            manager.getZoneId()
-    );
-
-    return ResponseEntity.status(HttpStatus.CREATED)
-            .body(toTechnicianDto(technician));
-}
     @GetMapping("/technicians")
     public ResponseEntity<List<TechnicianDto>> listTechnicians() {
         requireManager();
@@ -418,7 +412,6 @@ public ResponseEntity<?> createTechnician(
             @NotBlank String fullName,
             @Email String email,
             @NotBlank String phone,
-            Long dispatcherId,
             Long zoneId
     ) {}
 

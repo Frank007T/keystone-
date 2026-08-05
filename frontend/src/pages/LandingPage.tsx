@@ -53,7 +53,7 @@ export function LandingPage() {
                 </div>
               </div>
               <div className="flex flex-wrap gap-4">
-                <Link to="/choose-role" className="inline-flex items-center rounded-[16px] bg-primary px-6 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-secondary">
+                <Link to="/signup" className="inline-flex items-center rounded-[16px] bg-primary px-6 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-secondary">
                   Get Started
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>

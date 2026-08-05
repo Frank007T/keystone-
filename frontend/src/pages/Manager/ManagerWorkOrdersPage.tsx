@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from 'react';
-import axios from 'axios';
 import { 
   fetchManagerWorkOrders, 
   fetchManagerDispatcherMessages,
@@ -12,11 +11,6 @@ export function ManagerWorkOrdersPage() {
   const [orders, setOrders] = useState<WorkOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
-  // Create Work Order Modal State
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [formError, setFormError] = useState('');
 
   // Chat Enquiry Modal State
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
@@ -31,17 +25,6 @@ export function ManagerWorkOrdersPage() {
   const currentUserEmail = localStorage.getItem('userEmail') || '';
 
   // Form State for New Work Order
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    siteName: '',
-    customerEmail: '',
-    assignedToEmail: '',
-    priority: 'MEDIUM',
-    status: 'OPEN',
-    dueDate: '',
-  });
-
   const loadWorkOrders = () => {
     setLoading(true);
     fetchManagerWorkOrders()
@@ -60,47 +43,6 @@ export function ManagerWorkOrdersPage() {
       chatBottomRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, isChatModalOpen]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-
-  const handleCreateSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitting(true);
-    setFormError('');
-
-    try {
-      const token = localStorage.getItem('keystoneToken');
-      const API_BASE_URL = (import.meta.env as any).VITE_API_URL || 'http://localhost:8080';
-
-      const payload = {
-        ...formData,
-        dueDate: formData.dueDate ? new Date(formData.dueDate).toISOString() : null,
-      };
-
-      await axios.post(`${API_BASE_URL}/api/data/manager/work-orders`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      setIsModalOpen(false);
-      setFormData({
-        title: '',
-        description: '',
-        siteName: '',
-        customerEmail: '',
-        assignedToEmail: '',
-        priority: 'MEDIUM',
-        status: 'OPEN',
-        dueDate: '',
-      });
-      loadWorkOrders();
-    } catch (err: any) {
-      setFormError(err.response?.data?.message || err.message || 'Failed to create work order.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   // Fetch Chat History
   const fetchMessages = async (workOrderId: number) => {
@@ -147,23 +89,27 @@ export function ManagerWorkOrdersPage() {
     }
   };
 
+  const getStatusLabel = (status?: string) => {
+    const normalized = (status || '').toString().trim().toLowerCase();
+
+    if (normalized.includes('success')) return 'success';
+    if (normalized.includes('failed')) return 'failed';
+    if (normalized.includes('pending')) return 'pending';
+    if (normalized.includes('processing') || normalized.includes('in_progress') || normalized.includes('in progress') || normalized.includes('progress')) return 'processing';
+    if (normalized.includes('complete') || normalized.includes('completed')) return 'completed';
+
+    return normalized || 'pending';
+  };
+
   return (
     <div className="space-y-6">
       {/* Header Banner */}
       <div className="flex flex-col gap-4 rounded-[32px] bg-white p-6 shadow-soft sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Work Orders</p>
-          <h2 className="mt-2 text-2xl font-semibold text-slate-950">Create and manage service work orders</h2>
+          <h2 className="mt-2 text-2xl font-semibold text-slate-950">Manage service work orders</h2>
         </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="rounded-2xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-soft hover:bg-primary/90 transition-colors"
-        >
-          Create Work Order
-        </button>
       </div>
-
-      {/* Table Section */}
       <div className="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-soft">
         <table className="w-full border-collapse text-left text-sm text-slate-700">
           <thead className="bg-slate-50">
@@ -187,20 +133,25 @@ export function ManagerWorkOrdersPage() {
                 <td colSpan={8} className="px-6 py-10 text-center text-slate-500">No work orders found.</td>
               </tr>
             ) : (
-              orders.map((order) => (
-                <tr key={order.id} className="border-t border-slate-200 hover:bg-slate-50">
-                  <td className="px-6 py-4 font-medium text-slate-950">WO-{order.id}</td>
-                  <td className="px-6 py-4">{order.customerEmail}</td>
-                  <td className="px-6 py-4">{order.siteName}</td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
-                      order.status.toUpperCase() === 'COMPLETED' ? 'bg-emerald-100 text-emerald-800' :
-                      order.status.toUpperCase() === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-800' :
-                      'bg-amber-100 text-amber-800'
-                    }`}>
-                      {order.status}
-                    </span>
-                  </td>
+              orders.map((order) => {
+                const statusLabel = getStatusLabel(order.status);
+
+                return (
+                  <tr key={order.id} className="border-t border-slate-200 hover:bg-slate-50">
+                    <td className="px-6 py-4 font-medium text-slate-950">WO-{order.id}</td>
+                    <td className="px-6 py-4">{order.customerEmail}</td>
+                    <td className="px-6 py-4">{order.siteName}</td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
+                        statusLabel === 'success'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : statusLabel === 'failed'
+                            ? 'bg-rose-100 text-rose-800'
+                            : 'bg-amber-100 text-amber-800'
+                      }`}>
+                        {statusLabel}
+                      </span>
+                    </td>
                   <td className="px-6 py-4 font-medium">{order.priority}</td>
                   <td className="px-6 py-4">{order.assignedToEmail || 'Unassigned'}</td>
                   <td className="px-6 py-4">{order.dueDate ? new Date(order.dueDate).toLocaleDateString() : 'N/A'}</td>
@@ -212,8 +163,9 @@ export function ManagerWorkOrdersPage() {
                       💬 Enquire
                     </button>
                   </td>
-                </tr>
-              ))
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
@@ -305,136 +257,6 @@ export function ManagerWorkOrdersPage() {
               </button>
             </form>
 
-          </div>
-        </div>
-      )}
-
-      {/* Create Work Order Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
-          <div className="w-full max-w-lg rounded-[28px] bg-white p-6 shadow-xl">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <h3 className="text-xl font-semibold text-slate-950">Create Work Order</h3>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600"
-              >
-                ✕
-              </button>
-            </div>
-
-            {formError && <p className="mt-4 text-sm text-rose-600">{formError}</p>}
-
-            <form onSubmit={handleCreateSubmit} className="mt-4 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500">Title</label>
-                <input
-                  type="text"
-                  name="title"
-                  required
-                  value={formData.title}
-                  onChange={handleChange}
-                  className="mt-1 w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-primary"
-                  placeholder="HVAC Repair / System Check"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500">Description</label>
-                <textarea
-                  name="description"
-                  required
-                  rows={3}
-                  value={formData.description}
-                  onChange={handleChange}
-                  className="mt-1 w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-primary"
-                  placeholder="Detailed breakdown of work required..."
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500">Site Name</label>
-                  <input
-                    type="text"
-                    name="siteName"
-                    required
-                    value={formData.siteName}
-                    onChange={handleChange}
-                    className="mt-1 w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-primary"
-                    placeholder="Building A"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500">Customer Email</label>
-                  <input
-                    type="email"
-                    name="customerEmail"
-                    required
-                    value={formData.customerEmail}
-                    onChange={handleChange}
-                    className="mt-1 w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-primary"
-                    placeholder="client@company.com"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500">Assign Technician</label>
-                  <input
-                    type="email"
-                    name="assignedToEmail"
-                    value={formData.assignedToEmail}
-                    onChange={handleChange}
-                    className="mt-1 w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-primary"
-                    placeholder="tech@keystone.com"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500">Priority</label>
-                  <select
-                    name="priority"
-                    value={formData.priority}
-                    onChange={handleChange}
-                    className="mt-1 w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-primary"
-                  >
-                    <option value="LOW">LOW</option>
-                    <option value="MEDIUM">MEDIUM</option>
-                    <option value="HIGH">HIGH</option>
-                    <option value="URGENT">URGENT</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500">Due Date</label>
-                <input
-                  type="date"
-                  name="dueDate"
-                  value={formData.dueDate}
-                  onChange={handleChange}
-                  className="mt-1 w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-primary"
-                />
-              </div>
-
-              <div className="mt-6 flex justify-end gap-3 border-t border-slate-100 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="rounded-xl px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="rounded-xl bg-primary px-5 py-2 text-sm font-semibold text-white shadow-soft hover:bg-primary/90 disabled:opacity-50"
-                >
-                  {submitting ? 'Saving...' : 'Create Order'}
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}

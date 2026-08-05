@@ -26,13 +26,16 @@ export function CustomerNotificationsPage() {
           ) : notifications.length === 0 ? (
             <div className="rounded-[24px] border border-slate-200 p-5 text-center text-slate-500">No notifications available.</div>
           ) : (
-            notifications.map((notification) => (
-              <div key={`${notification.title}-${notification.createdAt}`} className="rounded-[24px] border border-slate-200 p-5">
-                <p className="font-semibold text-slate-950">{notification.title}</p>
-                <p className="mt-1 text-sm text-slate-500">{notification.message}</p>
-                <p className="mt-2 text-xs uppercase tracking-[0.3em] text-slate-400">{new Date(notification.createdAt).toLocaleString()}</p>
-              </div>
-            ))
+            notifications.map((notification) => {
+              const createdAtLabel = notification.createdAt ? new Date(notification.createdAt).toLocaleString() : '—';
+              return (
+                <div key={`${notification.title}-${notification.createdAt}`} className="rounded-[24px] border border-slate-200 p-5">
+                  <p className="font-semibold text-slate-950">{notification.title}</p>
+                  <p className="mt-1 text-sm text-slate-500">{notification.message}</p>
+                  <p className="mt-2 text-xs uppercase tracking-[0.3em] text-slate-400">{createdAtLabel}</p>
+                </div>
+              );
+            })
           )}
         </div>
       </div>

@@ -1,4 +1,5 @@
 import axios, { type AxiosResponse } from 'axios';
+import type { AuditLogItem, AuditLogResponse, AuditLogStatistics } from '../types/audit';
 
 // ==========================================
 // TYPE DEFINITIONS
@@ -189,6 +190,114 @@ export interface AdminDashboardResponse {
   totalRequestCount: number;
 }
 
+export interface RequestCategoryItem {
+  name: string;
+  count: number;
+}
+
+export interface RecentActivityItem {
+  time: string;
+  user: string;
+  action: string;
+  status: string;
+}
+
+export interface DashboardReportResponse {
+  totalUsers: number;
+  totalManagers: number;
+  totalDispatchers: number;
+  totalTechnicians: number;
+  activeUsers: number;
+  inactiveUsers: number;
+  pendingRequests: number;
+  completedRequests: number;
+  cancelledRequests: number;
+  openRequests: number;
+  closedRequests: number;
+  escalatedRequests: number;
+  averageResolutionTimeHours: number;
+  averageResponseTimeHours: number;
+  slaCompliancePercent: number;
+  customerSatisfaction: number;
+  revenue: number;
+  invoicesGenerated: number;
+  paymentsReceived: number;
+  collectionsPending: number;
+  growthComparedToLastMonth: number;
+  requestsCreatedToday: number;
+  requestsCompletedToday: number;
+  reopenedRequests: number;
+  topRequestCategories: RequestCategoryItem[];
+  recentActivities: RecentActivityItem[];
+}
+
+export interface RequestSummaryResponse {
+  requestsCreatedToday: number;
+  requestsCompletedToday: number;
+  pendingRequests: number;
+  averageCompletionTimeHours: number;
+  averageAssignmentTimeHours: number;
+  reopenedRequests: number;
+  topRequestCategories: RequestCategoryItem[];
+  peakHours: Array<{ hour: string; count: number }>;
+  recentActivities: RecentActivityItem[];
+}
+
+export interface RevenueReportResponse {
+  totalRevenue: number;
+  outstandingPayments: number;
+  invoices: number;
+  collections: number;
+  refunds: number;
+  dailyRevenue: Array<{ label: string; value: number }>;
+  weeklyRevenue: Array<{ label: string; value: number }>;
+  monthlyRevenue: Array<{ label: string; value: number }>;
+  yearlyRevenue: Array<{ label: string; value: number }>;
+}
+
+export interface ManagerPerformanceItem {
+  name: string;
+  assignedRequests: number;
+  completed: number;
+  pending: number;
+  cancelled: number;
+  averageResolutionTimeHours: number;
+  customerRating: number;
+  efficiencyPercent: number;
+  completionPercent: number;
+  ranking: number;
+}
+
+export interface TeamAllocationResponse {
+  managersAvailable: number;
+  dispatchersAvailable: number;
+  techniciansAvailable: number;
+  techniciansBusy: number;
+  techniciansOffline: number;
+  utilizationPercent: number;
+  overloadedTeams: Array<{ name: string; value: number }>;
+  underutilizedTeams: Array<{ name: string; value: number }>;
+}
+
+export interface SlaHealthResponse {
+  metSla: number;
+  breachedSla: number;
+  nearBreach: number;
+  averageSlaPercent: number;
+  criticalTickets: number;
+  escalations: number;
+}
+
+export interface ZoneAnalyticsItem {
+  name: string;
+  requests: number;
+  revenue: number;
+  completionPercent: number;
+  averageTimeHours: number;
+  managerCount: number;
+  technicianCount: number;
+}
+
 // ==========================================
 // AXIOS CLIENT CONFIGURATION
 // ==========================================
@@ -292,6 +401,34 @@ export function deleteRequest(id: number | string) {
 }
 
 // ==========================================
+// AUDIT LOG ENDPOINTS
+// ==========================================
+
+export function fetchAuditLogs(params?: Record<string, any>) {
+  return handleResponse<AuditLogResponse>(api.get('/api/admin/audit-logs', { params }));
+}
+
+export function searchAuditLogs(payload: Record<string, any>) {
+  return handleResponse<AuditLogResponse>(api.post('/api/admin/audit-logs/search', payload));
+}
+
+export function fetchAuditLogById(id: number | string) {
+  return handleResponse<AuditLogItem>(api.get(`/api/admin/audit-logs/${id}`));
+}
+
+export function fetchAuditStatistics() {
+  return handleResponse<AuditLogStatistics>(api.get('/api/admin/audit-logs/statistics'));
+}
+
+export function exportAuditLogs(format: 'csv' | 'excel' | 'pdf') {
+  return api.get(`/api/admin/audit-logs/export`, { params: { format }, responseType: 'blob' });
+}
+
+export function deleteAuditLog(id: number | string) {
+  return handleResponse<void>(api.delete(`/api/admin/audit-logs/${id}`));
+}
+
+// ==========================================
 // MANAGER & DISPATCHER USER MANAGEMENT ENDPOINTS
 // ==========================================
 
@@ -319,7 +456,7 @@ export function resetDispatcherPassword(id: number) {
   return handleResponse<string>(api.post(`/api/admin/dispatchers/${id}/reset-password`));
 }
 
-export function createTechnician(payload: { fullName: string; email: string; phone: string; dispatcherId: number; zoneId: number }) {
+export function createTechnician(payload: { fullName: string; email: string; phone: string }) {
   return handleResponse<Technician>(api.post('/api/admin/technicians', payload));
 }
 
@@ -348,15 +485,43 @@ export function fetchDispatcherCustomers() {
 }
 
 export function fetchManagerTechnicians() {
-  return handleResponse<User[]>(api.get('/api/data/manager/technicians'));
+  return handleResponse<Technician[]>(api.get('/api/data/manager/technicians'));
 }
 
 export function fetchDispatcherTechnicians() {
-  return handleResponse<User[]>(api.get('/api/data/dispatcher/technicians'));
+  return handleResponse<Technician[]>(api.get('/api/data/dispatcher/technicians'));
 }
 
 export function fetchManagerDispatchers() {
-  return handleResponse<User[]>(api.get('/api/data/manager/dispatchers'));
+  return handleResponse<Dispatcher[]>(api.get('/api/data/manager/dispatchers'));
+}
+
+export function fetchDashboardReport(params?: Record<string, unknown>) {
+  return handleResponse<DashboardReportResponse>(api.get('/api/admin/reports/dashboard', { params }));
+}
+
+export function fetchRequestSummary(params?: Record<string, unknown>) {
+  return handleResponse<RequestSummaryResponse>(api.get('/api/admin/reports/requests', { params }));
+}
+
+export function fetchRevenueReport(params?: Record<string, unknown>) {
+  return handleResponse<RevenueReportResponse>(api.get('/api/admin/reports/revenue', { params }));
+}
+
+export function fetchManagerPerformance(params?: Record<string, unknown>) {
+  return handleResponse<ManagerPerformanceItem[]>(api.get('/api/admin/reports/manager-performance', { params }));
+}
+
+export function fetchTeamAllocation(params?: Record<string, unknown>) {
+  return handleResponse<TeamAllocationResponse>(api.get('/api/admin/reports/team-allocation', { params }));
+}
+
+export function fetchSlaHealth(params?: Record<string, unknown>) {
+  return handleResponse<SlaHealthResponse>(api.get('/api/admin/reports/sla', { params }));
+}
+
+export function fetchZoneAnalytics(params?: Record<string, unknown>) {
+  return handleResponse<ZoneAnalyticsItem[]>(api.get('/api/admin/reports/zones', { params }));
 }
 
 // ==========================================
@@ -427,10 +592,6 @@ export function fetchMyTimeLogs() {
 
 export function fetchTimeLogs() {
   return fetchMyTimeLogs();
-}
-
-export function fetchPartsUsed() {
-  return handleResponse<Part[]>(api.get('/api/data/technician/parts-used'));
 }
 
 export function createRequest(payload: CreateRequestPayload) {

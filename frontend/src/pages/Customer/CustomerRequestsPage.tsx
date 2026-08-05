@@ -45,16 +45,31 @@ export function CustomerRequestsPage() {
                   </td>
                 </tr>
               ) : (
-                requests.map((request) => (
-                  <tr key={request.id} className="border-t border-slate-200 hover:bg-slate-50">
-                    <td className="px-6 py-4 font-medium text-slate-950">REQ-{request.id}</td>
-                    <td className="px-6 py-4">{request.title}</td>
-                    <td className="px-6 py-4">{request.siteName}</td>
-                    <td className="px-6 py-4">{request.priority}</td>
-                    <td className="px-6 py-4">{request.status}</td>
-                    <td className="px-6 py-4">{new Date(request.createdAt).toLocaleDateString()}</td>
-                  </tr>
-                ))
+                requests.map((request) => {
+                  const statusLabel = (request.status || '').toString().trim().toLowerCase();
+                  const normalizedStatus = statusLabel.includes('success')
+                    ? 'success'
+                    : statusLabel.includes('failed')
+                      ? 'failed'
+                      : statusLabel.includes('pending')
+                        ? 'pending'
+                        : statusLabel.includes('processing') || statusLabel.includes('in_progress') || statusLabel.includes('in progress') || statusLabel.includes('progress')
+                          ? 'processing'
+                          : statusLabel.includes('complete') || statusLabel.includes('completed')
+                            ? 'completed'
+                            : statusLabel || 'pending';
+
+                  return (
+                    <tr key={request.id} className="border-t border-slate-200 hover:bg-slate-50">
+                      <td className="px-6 py-4 font-medium text-slate-950">REQ-{request.id}</td>
+                      <td className="px-6 py-4">{request.title}</td>
+                      <td className="px-6 py-4">{request.siteName}</td>
+                      <td className="px-6 py-4">{request.priority}</td>
+                      <td className="px-6 py-4">{normalizedStatus}</td>
+                      <td className="px-6 py-4">{new Date(request.createdAt).toLocaleDateString()}</td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

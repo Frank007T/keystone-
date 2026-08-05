@@ -1,5 +1,6 @@
 package com.keystone.backend.controller;
 
+import com.keystone.backend.annotation.AuditLog;
 import com.keystone.backend.entity.InvoiceEntity;
 import com.keystone.backend.entity.SiteEntity;
 import com.keystone.backend.entity.WorkOrderEntity;
@@ -99,6 +100,7 @@ public class CustomerDataController {
     }
 
     @PostMapping("/requests")
+    @AuditLog(action = "CREATE_ORDER", module = "REQUEST", description = "Created a service request", entityType = "WORK_ORDER")
     public ResponseEntity<String> createRequest(@RequestBody CreateRequestRequest request) {
         WorkOrderEntity workOrder = new WorkOrderEntity();
         workOrder.setTitle(request.title());

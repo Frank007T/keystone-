@@ -164,12 +164,6 @@ export default function ManagerDispatchersPage() {
                   </td>
                   <td className="p-4 text-right space-x-2">
                     <button
-                      onClick={() => handleResetPassword(dispatcher.id)}
-                      className="text-amber-600 hover:text-amber-800 font-medium"
-                    >
-                      Reset Password
-                    </button>
-                    <button
                       onClick={() => handleOpenModal(dispatcher)}
                       className="text-indigo-600 hover:text-indigo-800 font-medium"
                     >

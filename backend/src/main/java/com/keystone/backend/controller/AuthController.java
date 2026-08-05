@@ -1,5 +1,6 @@
 package com.keystone.backend.controller;
 
+import com.keystone.backend.annotation.AuditLog;
 import com.keystone.backend.entity.Role;
 import com.keystone.backend.entity.UserEntity;
 import com.keystone.backend.repository.UserRepository;
@@ -41,6 +42,7 @@ public class AuthController {
     // ==========================================
 
     @PostMapping("/signup")
+    @AuditLog(action = "CREATE_USER", module = "AUTH", description = "Customer signed up", entityType = "USER")
     public ResponseEntity<?> signup(@Valid @RequestBody SignupRequest request) {
         if (userRepository.findByEmail(request.email()).isPresent()) {
             return ResponseEntity.badRequest().body("Email already registered.");
@@ -107,6 +109,7 @@ public class AuthController {
      * Password-based Login (All Roles)
      */
     @PostMapping("/login")
+    @AuditLog(action = "LOGIN", module = "AUTH", description = "User logged in", entityType = "USER")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         Optional<UserEntity> optionalUser = userRepository.findByEmail(request.email());
         if (optionalUser.isEmpty()) {
@@ -235,6 +238,7 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
+    @AuditLog(action = "CHANGE_PASSWORD", module = "AUTH", description = "Password reset", entityType = "USER")
     public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         Optional<UserEntity> optionalUser = userRepository.findByEmail(request.email());
         if (optionalUser.isEmpty()) {

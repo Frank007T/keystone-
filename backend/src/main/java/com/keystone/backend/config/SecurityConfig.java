@@ -73,8 +73,10 @@ public class SecurityConfig {
                                 "/api/admin/managers/**",
                                 "/api/admin/dashboard",
                                 "/api/admin/users",
-                                "/api/admin/requests/**"
-                        ).hasAnyAuthority("SUPER_ADMIN", "ROLE_SUPER_ADMIN")
+                                "/api/admin/requests/**",
+                                "/api/admin/audit-logs/**",
+                                "/api/admin/reports/**"
+                        ).hasAnyAuthority("SUPER_ADMIN", "ROLE_SUPER_ADMIN", "ADMIN", "ROLE_ADMIN")
 
                         // 5. MANAGER & SUPER ADMIN ACCESS
                         .requestMatchers(

@@ -10,7 +10,7 @@ import {
 } from '../../lib/api'; // Adjust this import path if your api file is named differently
 
 interface OutletContextType {
-  selectedZone: string;
+  selectedZone?: string;
 }
 
 // Helper map to translate zone name to a numerical zone ID
@@ -22,9 +22,9 @@ const ZONE_MAP: Record<string, number> = {
 };
 
 export function ManageManagersPage() {
-  // Safe context fallback to avoid null destructuring errors
-  const context = useOutletContext<OutletContextType>() || { selectedZone: 'North' };
-  const { selectedZone } = context;
+  const context = useOutletContext<OutletContextType | null>() || {};
+  const selectedZone = context.selectedZone ?? 'All';
+  const selectedZoneId = selectedZone === 'All' ? undefined : ZONE_MAP[selectedZone] ?? undefined;
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -42,7 +42,7 @@ export function ManageManagersPage() {
     fullName: '',
     email: '',
     phone: '',
-    zoneId: ZONE_MAP[selectedZone] || 1,
+    zoneId: selectedZoneId ?? 1,
   });
 
   // Handle URL query action (e.g. ?action=add)
@@ -56,9 +56,9 @@ export function ManageManagersPage() {
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
-      zoneId: ZONE_MAP[selectedZone] || 1,
+      zoneId: selectedZoneId ?? 1,
     }));
-  }, [selectedZone]);
+  }, [selectedZoneId]);
 
   // Fetch Managers using imported API function
   const fetchManagers = async () => {
@@ -161,7 +161,7 @@ export function ManageManagersPage() {
       fullName: '',
       email: '',
       phone: '',
-      zoneId: ZONE_MAP[selectedZone] || 1,
+      zoneId: selectedZoneId ?? 1,
     });
     setIsAddModalOpen(true);
   };
@@ -187,7 +187,7 @@ export function ManageManagersPage() {
 
   // Filtered List
   const filteredManagers = managers.filter((m) => {
-    const matchesZone = m.zoneId === ZONE_MAP[selectedZone];
+    const matchesZone = selectedZoneId === undefined || m.zoneId === selectedZoneId;
     const matchesSearch =
       m.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       m.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -203,9 +203,9 @@ export function ManageManagersPage() {
         <div>
           <h2 className="text-2xl font-bold text-slate-900">Manage Managers</h2>
           <p className="text-sm text-slate-500">
-            Viewing records active in{' '}
+            Viewing records for{' '}
             <span className="font-semibold text-slate-700">
-              {selectedZone} Zone
+              {selectedZone === 'All' ? 'all zones' : `${selectedZone} Zone`}
             </span>
           </p>
         </div>
@@ -243,7 +243,7 @@ export function ManageManagersPage() {
           </div>
         ) : filteredManagers.length === 0 ? (
           <div className="p-12 text-center text-slate-500">
-            No managers found for the {selectedZone} Zone.
+            No managers found for {selectedZone === 'All' ? 'the selected filters' : `${selectedZone} Zone`}.
           </div>
         ) : (
           <div className="overflow-x-auto">

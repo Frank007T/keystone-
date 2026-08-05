@@ -4,9 +4,10 @@
 
 :root {
   color-scheme: light;
-  font-family: 'Inter', system-ui, sans-serif;
-  background-color: #FAFBFF;
-  color: #0F172A;
+  font-family: 'Inter', 'Poppins', system-ui, sans-serif;
+  background-color: #FCFCFD;
+  color: #111827;
+  text-rendering: optimizeLegibility;
 }
 
 html {
@@ -15,7 +16,7 @@ html {
 
 body {
   min-height: 100vh;
-  background: #FAFBFF;
+  background: radial-gradient(circle at top left, rgba(109, 40, 217, 0.08), transparent 28%), radial-gradient(circle at bottom right, rgba(139, 92, 246, 0.08), transparent 30%), #FCFCFD;
 }
 
 * {
@@ -30,5 +31,27 @@ select {
 }
 
 ::selection {
-  background: rgba(91, 61, 245, 0.18);
+  background: rgba(109, 40, 217, 0.18);
+  color: #111827;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at top left, rgba(109, 40, 217, 0.08), transparent 22%), radial-gradient(circle at bottom right, rgba(139, 92, 246, 0.06), transparent 18%);
+}
+
+body {
+  position: relative;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

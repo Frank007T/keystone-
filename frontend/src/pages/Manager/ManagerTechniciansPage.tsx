@@ -18,7 +18,6 @@ export default function ManagerTechniciansPage() {
     fullName: "",
     email: "",
     phone: "",
-    dispatcherId: "",
   });
 
   useEffect(() => {
@@ -49,13 +48,10 @@ export default function ManagerTechniciansPage() {
     setIsSubmitting(true);
 
     try {
-      const newTech = await createTechnician({
-        ...formData,
-        enabled: true,
-      });
+      const newTech = await createTechnician(formData);
 
       setTechnicians((prev) => [...prev, newTech]);
-      setFormData({ fullName: "", email: "", phone: "", dispatcherId: "" });
+      setFormData({ fullName: "", email: "", phone: "" });
       setIsModalOpen(false);
     } catch (err: any) {
       setFormError(err.message || "Failed to add technician.");
@@ -92,7 +88,6 @@ export default function ManagerTechniciansPage() {
                 <th className="px-6 py-4">Name</th>
                 <th className="px-6 py-4">Email</th>
                 <th className="px-6 py-4">Phone</th>
-                <th className="px-6 py-4">Dispatcher</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4">Actions</th>
               </tr>
@@ -126,7 +121,6 @@ export default function ManagerTechniciansPage() {
                     <td className="px-6 py-5 font-semibold text-slate-900">{tech.fullName}</td>
                     <td className="px-6 py-5 text-slate-600">{tech.email}</td>
                     <td className="px-6 py-5 text-slate-600">{tech.phone}</td>
-                    <td className="px-6 py-5 text-slate-600">{tech.dispatcherId ?? "N/A"}</td>
                     <td className="px-6 py-5">
                       {tech.enabled ? (
                         <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
@@ -211,19 +205,6 @@ export default function ManagerTechniciansPage() {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700">
-                  Dispatcher ID
-                </label>
-                <input
-                  type="text"
-                  name="dispatcherId"
-                  required
-                  value={formData.dispatcherId}
-                  onChange={handleInputChange}
-                  className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-2 focus:border-violet-500 focus:outline-none"
-                />
-              </div>
 
               <div className="mt-6 flex justify-end gap-3">
                 <button

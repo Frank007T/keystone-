@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 
 const navItems = [
   { label: 'Dashboard', path: 'dashboard' },
@@ -11,6 +11,14 @@ const navItems = [
 ];
 
 export function TechnicianPortalLayout() {
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    localStorage.removeItem('keystoneToken');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userEmail');
+    navigate('/');
+  };
+
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900">
       <div className="grid min-h-screen grid-cols-[260px_1fr] gap-6 px-6 py-6">
@@ -35,6 +43,14 @@ export function TechnicianPortalLayout() {
               </NavLink>
             ))}
           </nav>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="mt-8 w-full rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-white transition hover:bg-secondary"
+          >
+            Logout
+          </button>
         </aside>
 
         <main className="rounded-[32px] bg-white p-6 shadow-soft">

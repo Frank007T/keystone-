@@ -8,7 +8,7 @@ import api, {
 } from '../../lib/api';
 
 interface NotificationItem {
-  id: string | number;
+  id?: string | number;
   workOrderId?: string | number;
   title?: string;
   message: string;

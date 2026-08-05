@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { fetchDispatcherTechnicians, fetchDispatcherWorkOrders, User, WorkOrder } from '../../lib/api';
+import { fetchDispatcherTechnicians, fetchDispatcherWorkOrders, Technician, WorkOrder } from '../../lib/api';
 
 export function DispatcherDashboardPage() {
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
-  const [technicians, setTechnicians] = useState<User[]>([]);
+  const [technicians, setTechnicians] = useState<Technician[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 

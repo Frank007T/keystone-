@@ -113,16 +113,28 @@ export function ManagerRequestsPage() {
 
   const getStatusBadgeClass = (status: string) => {
     switch (status?.toLowerCase()) {
-      case 'completed':
+      case 'success':
         return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-      case 'in_progress':
-      case 'in progress':
-        return 'bg-amber-50 text-amber-700 border-amber-200';
-      case 'pending':
+      case 'failed':
         return 'bg-rose-50 text-rose-700 border-rose-200';
+      case 'processing':
+      case 'pending':
+        return 'bg-amber-50 text-amber-700 border-amber-200';
       default:
         return 'bg-slate-50 text-slate-700 border-slate-200';
     }
+  };
+
+  const getStatusLabel = (status?: string) => {
+    const normalized = (status || '').toString().trim().toLowerCase();
+
+    if (normalized.includes('success')) return 'success';
+    if (normalized.includes('failed')) return 'failed';
+    if (normalized.includes('pending')) return 'pending';
+    if (normalized.includes('processing') || normalized.includes('in_progress') || normalized.includes('in progress') || normalized.includes('progress')) return 'processing';
+    if (normalized.includes('complete') || normalized.includes('completed')) return 'completed';
+
+    return normalized || 'pending';
   };
 
   return (
@@ -196,11 +208,11 @@ export function ManagerRequestsPage() {
                     <td className="px-6 py-4 capitalize">{req.priority}</td>
                     <td className="px-6 py-4">
                       <span
-                        className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium capitalize ${getStatusBadgeClass(
+                        className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium ${getStatusBadgeClass(
                           req.status
                         )}`}
                       >
-                        {req.status}
+                        {getStatusLabel(req.status)}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-slate-500">

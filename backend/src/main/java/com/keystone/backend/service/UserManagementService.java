@@ -105,7 +105,7 @@ public class UserManagementService {
     /**
      * Create a new technician (Manager only)
      */
-    public UserEntity createTechnician(String fullName, String email, String phone, Long managerId, Long dispatcherId, Long zoneId) {
+    public UserEntity createTechnician(String fullName, String email, String phone, Long managerId, Long zoneId) {
         if (userRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("Email already exists.");
         }
@@ -113,11 +113,6 @@ public class UserManagementService {
         Optional<UserEntity> managerOpt = userRepository.findById(managerId);
         if (managerOpt.isEmpty() || managerOpt.get().getRole() != Role.MANAGER) {
             throw new IllegalArgumentException("Invalid manager ID.");
-        }
-
-        Optional<UserEntity> dispatcherOpt = userRepository.findById(dispatcherId);
-        if (dispatcherOpt.isEmpty() || dispatcherOpt.get().getRole() != Role.DISPATCHER) {
-            throw new IllegalArgumentException("Invalid dispatcher ID.");
         }
 
         String tempPassword = generateTemporaryPassword();
@@ -129,7 +124,6 @@ public class UserManagementService {
         technician.setPhone(phone);
         technician.setRole(Role.TECHNICIAN);
         technician.setManagerId(managerId);
-        technician.setDispatcherId(dispatcherId);
         technician.setZoneId(zoneId);
         technician.setEnabled(true);
         technician.setOtpVerified(true);

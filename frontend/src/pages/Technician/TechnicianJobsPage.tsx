@@ -134,12 +134,22 @@ export function TechnicianJobsPage() {
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold ${
-                          job.status?.toUpperCase() === 'ASSIGNED'
+                          (job.status || '').toString().toLowerCase().includes('assigned')
                             ? 'bg-blue-100 text-blue-700'
                             : 'bg-amber-100 text-amber-700'
                         }`}
                       >
-                        {job.status}
+                        {(job.status || '').toString().trim().toLowerCase().includes('assigned')
+                          ? 'assigned'
+                          : (job.status || '').toString().trim().toLowerCase().includes('success')
+                            ? 'success'
+                            : (job.status || '').toString().trim().toLowerCase().includes('failed')
+                              ? 'failed'
+                              : (job.status || '').toString().trim().toLowerCase().includes('pending')
+                                ? 'pending'
+                                : (job.status || '').toString().trim().toLowerCase().includes('processing') || (job.status || '').toString().trim().toLowerCase().includes('in progress')
+                                  ? 'processing'
+                                  : 'pending'}
                       </span>
                     </td>
                     <td className="px-6 py-4">

@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 
 const navItems = [
   { label: 'Dashboard', path: 'dashboard' },
@@ -16,6 +16,14 @@ const navItems = [
 ];
 
 export function ManagerPortalLayout() {
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    localStorage.removeItem('keystoneToken');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userEmail');
+    navigate('/');
+  };
+
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900">
       <div className="grid min-h-screen grid-cols-[280px_1fr]">
@@ -43,22 +51,17 @@ export function ManagerPortalLayout() {
               </NavLink>
             ))}
           </nav>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="mt-8 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50"
+          >
+            Logout
+          </button>
         </aside>
 
         <main className="bg-slate-100 p-6">
-          <header className="mb-8 flex flex-col gap-4 rounded-[32px] bg-white p-6 shadow-soft sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Manager workspace</p>
-              <h2 className="mt-2 text-3xl font-semibold text-slate-950">Operational command center</h2>
-            </div>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <button className="rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-soft hover:bg-slate-800">
-                Create Work Order
-              </button>
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">Alex Johnson • Manager</div>
-            </div>
-          </header>
-
           <Outlet />
         </main>
       </div>

@@ -9,9 +9,9 @@ interface GlassCardProps {
 export function GlassCard({ className, children }: GlassCardProps) {
   return (
     <motion.div
-      className={`group relative overflow-hidden rounded-[24px] border border-white/60 bg-white/70 p-5 shadow-soft backdrop-blur-xl ${className ?? ''}`}
-      whileHover={{ y: -4 }}
-      transition={{ type: 'spring', stiffness: 280, damping: 24 }}
+      className={`group relative overflow-hidden rounded-[28px] border border-white/30 bg-white/75 p-6 shadow-glass backdrop-blur-2xl transition-transform duration-300 ${className ?? ''}`}
+      whileHover={{ y: -6, scale: 1.01 }}
+      transition={{ type: 'spring', stiffness: 260, damping: 24 }}
     >
       {children}
     </motion.div>

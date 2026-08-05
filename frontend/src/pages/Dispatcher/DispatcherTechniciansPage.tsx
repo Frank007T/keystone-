@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { fetchDispatcherTechnicians, User } from '@/lib/api';
+import { fetchDispatcherTechnicians, Technician } from '@/lib/api';
 
 export function DispatcherTechniciansPage() {
-  const [technicians, setTechnicians] = useState<User[]>([]);
+  const [technicians, setTechnicians] = useState<Technician[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 

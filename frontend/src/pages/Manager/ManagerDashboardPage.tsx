@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { fetchManagerCustomers, fetchManagerTechnicians, fetchManagerWorkOrders, fetchPartInventory, Part, User, WorkOrder } from '../../lib/api';
+import { fetchManagerCustomers, fetchManagerTechnicians, fetchManagerWorkOrders, fetchPartInventory, Part, Technician, User, WorkOrder } from '../../lib/api';
 
 export function ManagerDashboardPage() {
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
   const [customers, setCustomers] = useState<User[]>([]);
-  const [technicians, setTechnicians] = useState<User[]>([]);
+  const [technicians, setTechnicians] = useState<Technician[]>([]);
   const [parts, setParts] = useState<Part[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -22,8 +22,9 @@ export function ManagerDashboardPage() {
   }, []);
 
   const totalWorkOrders = workOrders.length;
-  const inProgressCount = workOrders.filter((order) => order.status.toLowerCase().includes('progress')).length;
-  const completedCount = workOrders.filter((order) => order.status.toLowerCase().includes('completed')).length;
+  const processingCount = workOrders.filter((order) => (order.status || '').toString().toLowerCase().includes('processing')).length;
+  const successCount = workOrders.filter((order) => (order.status || '').toString().toLowerCase().includes('success')).length;
+  const failedCount = workOrders.filter((order) => (order.status || '').toString().toLowerCase().includes('failed')).length;
   const overdueCount = workOrders.filter((order) => {
     if (!order.dueDate) return false;
     const due = new Date(order.dueDate);
@@ -45,9 +46,9 @@ export function ManagerDashboardPage() {
       <div className="grid gap-4 md:grid-cols-4">
         {[
           { label: 'Total Work Orders', value: totalWorkOrders.toString() },
-          { label: 'In Progress', value: inProgressCount.toString() },
-          { label: 'Completed', value: completedCount.toString() },
-          { label: 'Overdue', value: overdueCount.toString() },
+          { label: 'Processing', value: processingCount.toString() },
+          { label: 'Success', value: successCount.toString() },
+          { label: 'Failed', value: failedCount.toString() },
         ].map((stat) => (
           <div key={stat.label} className="rounded-[24px] bg-white p-6 shadow-soft">
             <p className="text-sm uppercase tracking-[0.3em] text-slate-400">{stat.label}</p>
@@ -86,7 +87,7 @@ export function ManagerDashboardPage() {
                 <div key={technician.email} className="flex items-center justify-between rounded-[24px] border border-slate-200 p-4">
                   <div>
                     <p className="font-semibold text-slate-950">{technician.fullName}</p>
-                    <p className="text-sm text-slate-500">{technician.role}</p>
+                    <p className="text-sm text-slate-500">Technician</p>
                   </div>
                   <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-700">
                     {technician.enabled ? 'Active' : 'Pending'}

@@ -1,12 +1,16 @@
 package com.keystone.backend.controller;
 
+import com.keystone.backend.annotation.AuditLog;
 import com.keystone.backend.entity.Role;
 import com.keystone.backend.entity.UserEntity;
 import com.keystone.backend.entity.WorkOrderEntity;
 import com.keystone.backend.repository.UserRepository;
 import com.keystone.backend.repository.WorkOrderRepository;
+import com.keystone.backend.service.AuditLogService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,10 +22,12 @@ public class AdminDashboardController {
 
     private final UserRepository userRepository;
     private final WorkOrderRepository workOrderRepository;
+    private final AuditLogService auditLogService;
 
-    public AdminDashboardController(UserRepository userRepository, WorkOrderRepository workOrderRepository) {
+    public AdminDashboardController(UserRepository userRepository, WorkOrderRepository workOrderRepository, AuditLogService auditLogService) {
         this.userRepository = userRepository;
         this.workOrderRepository = workOrderRepository;
+        this.auditLogService = auditLogService;
     }
 
     @GetMapping("/dashboard")
@@ -67,9 +73,16 @@ public class AdminDashboardController {
                 ))
                 .collect(Collectors.toList());
 
-        List<ActivityDto> activities = List.of(
-                new ActivityDto("1", "System active and synchronized", "Just now", "system")
-        );
+        List<ActivityDto> activities = auditLogService.getLogs(new com.keystone.backend.dto.AuditLogFilterRequest(null, null, null, null, null, null, null, null, null, 1, 5, "createdAt", "DESC"))
+                .content()
+                .stream()
+                .map(log -> new ActivityDto(
+                        String.valueOf(log.id()),
+                        log.description() != null ? log.description() : log.action(),
+                        log.createdAt() != null ? log.createdAt().toString() : "Just now",
+                        log.module()
+                ))
+                .collect(Collectors.toList());
 
         DashboardResponse response = new DashboardResponse(
                 metrics,
@@ -113,6 +126,33 @@ public class AdminDashboardController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/requests")
+    public ResponseEntity<List<RequestDto>> getAllRequests() {
+        List<WorkOrderEntity> allRequests = workOrderRepository.findAll();
+        List<RequestDto> requestDtos = allRequests.stream()
+                .map(r -> new RequestDto(
+                        r.getId(),
+                        r.getTitle() != null ? r.getTitle() : "Request #" + r.getId(),
+                        r.getSiteName(),
+                        r.getCustomerEmail(),
+                        r.getPriority() != null ? r.getPriority() : "MEDIUM",
+                        r.getStatus() != null ? r.getStatus() : "Pending"
+                ))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(requestDtos);
+    }
+
+    @DeleteMapping("/requests/{id}")
+    @AuditLog(action = "DELETE_ORDER", module = "REQUEST", description = "Deleted a service request", entityType = "WORK_ORDER")
+    public ResponseEntity<Void> deleteRequest(@PathVariable Long id) {
+        WorkOrderEntity request = workOrderRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Request not found."));
+
+        workOrderRepository.delete(request);
+        return ResponseEntity.noContent().build();
     }
 
     // --- DTO RECORDS ---
